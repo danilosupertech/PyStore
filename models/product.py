@@ -1,4 +1,10 @@
-"""Module that represents a product."""
+"""
+product.py
+
+Module that represents products.
+
+"""
+from __future__ import annotations
 
 
 class Product:
@@ -17,7 +23,10 @@ class Product:
 
     @stock.setter
     def stock(self, value: int) -> None:
-        """Update the product stock."""
+        """
+        Update product stock.
+        This setter is silent (no print) to avoid duplicated messages.
+        """
         if not isinstance(value, int):
             print("❌ Stock must be an integer.")
             return
@@ -26,23 +35,22 @@ class Product:
             return
 
         self._stock = value
-        print(f"✅ Stock updated to {self.stock}")
 
-    # Magic Methods (the += / -= trick)
-    def __iadd__(self, amount: int):
+    # Magic Methods (+= / -=)
+    def __iadd__(self, amount: int) -> "Product":
         """Allows: product += 5"""
         if not isinstance(amount, int):
             print("❌ Amount must be an integer.")
             return self
-        self.stock = self.stock + amount  # calls the setter
+        self.stock = self.stock + amount
         return self
 
-    def __isub__(self, amount: int):
+    def __isub__(self, amount: int) -> "Product":
         """Allows: product -= 2"""
         if not isinstance(amount, int):
             print("❌ Amount must be an integer.")
             return self
-        self.stock = self.stock - amount  # calls the setter (blocks negative)
+        self.stock = self.stock - amount
         return self
 
     def update_stock(self, amount: int) -> None:
@@ -50,12 +58,28 @@ class Product:
         if not isinstance(amount, int):
             print("❌ Amount must be an integer.")
             return
-        self.stock = self.stock + amount  # setter will block negative totals
+
+        new_value = self.stock + amount
+        if new_value < 0:
+            print("❌ Stock cannot be negative.")
+            return
+
+        self._stock = new_value
         print(f"✅ Stock updated to {self.stock}")
-    
+
     def __str__(self) -> str:
         """Return a string with the product data."""
         return f"Product: {self.name} | Price: ${self.price:.2f} | Stock: {self.stock}"
+
+    def to_dict(self) -> dict:
+        """Return a dictionary with the product data."""
+        return {
+            "type": "generic",
+            "name": self.name,
+            "price": self.price,
+            "stock": self.stock,
+        }
+
 
 class PhysicalProduct(Product):
     """Class that represents a physical product with weight."""
@@ -70,13 +94,24 @@ class PhysicalProduct(Product):
         """Product weight."""
         return self._weight
 
+    def calculate_shipping(self) -> float:
+        """Calculate shipping cost based on weight."""
+        return self.weight * 5.00  # Example: $5.00 per kg
+
     def __str__(self) -> str:
         """Return a string with the physical product data."""
-        return f"[ Physical ] {super().__str__()} | Weight: {self.weight}kg | shipping: ${self.calculate_shipping():.2f}"
+        return (
+            f"[ Physical ] {super().__str__()} | "
+            f"Weight: {self.weight}kg | Shipping: ${self.calculate_shipping():.2f}"
+        )
 
-    def calculate_shipping(self) -> float:
-        """Calculates shipping cost based on weight."""
-        return self.weight * 5.00  # Example: $5.00 per kg
+    def to_dict(self) -> dict:
+        """Return a dictionary with the physical product data."""
+        data = super().to_dict()
+        data["type"] = "physical"
+        data["weight"] = self.weight
+        return data
+
 
 class DigitalProduct(Product):
     """Class that represents a digital product with file size."""
@@ -90,17 +125,9 @@ class DigitalProduct(Product):
         """Return a string with the digital product data."""
         return f"[ Digital ] {super().__str__()} | Size: {self.size_mb}MB"
 
-if __name__ == "__main__":
-    p1 = Product("Banana", 10.5, 40)
-    p2 = PhisicalProduct("Book", 25.0, 10, 0.5)
-    p3 = DigitalProduct("E-book", 15.0, 20, 10.5)
-    print(p1)
-
-    p1.update_stock(10)
-    p1.update_stock(-60)
-
-    print(p1)
-
-    p1 -= 5
-    print(p1)
-    print(p2)
+    def to_dict(self) -> dict:
+        """Return a dictionary with the digital product data."""
+        data = super().to_dict()
+        data["type"] = "digital"
+        data["size_mb"] = self.size_mb
+        return data

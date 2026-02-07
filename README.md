@@ -1,52 +1,171 @@
-# 🛒 PyStore - E-commerce Backend System (CLI)
 
-> **Modular E-commerce Backend (CLI) built with Python. Demonstrates advanced OOP patterns including Composition, Aggregation, Inheritance, and strict Encapsulation.**
+# 🛒 PyStore — CLI Store Management System (Python)
+
+PyStore is a **Python-based CLI (Command Line Interface) store management system** designed to demonstrate strong foundations in **Object-Oriented Programming**, **clean architecture**, and **data persistence** using JSON.
+
+This project was built with a focus on **software design principles**, making it an excellent **portfolio project for junior–mid Python developers** and a solid base for future expansion into APIs or full-stack systems.
 
 ---
 
-PyStore is a backend logic simulation for an e-commerce platform, built entirely in **Python**. This project was architected to demonstrate a deep understanding of **Object-Oriented Analysis and Design (OOAD)**, specifically focusing on the relationships between objects (Composition vs. Aggregation).
+## 🚀 Key Features
 
-## 🎯 Technical Objectives
+- 📦 **Product Catalog**
+  - Generic, Physical, and Digital products
+  - Real-time stock management
+  - Automatic shipping calculation for physical products
 
-Unlike simple scripts, PyStore showcases how to structure a scalable application using:
+- 🛒 **Shopping Cart (Order)**
+  - Add / remove items
+  - Partial or full item removal
+  - Automatic stock updates
+  - Cart summary per customer
 
-* **Composition (Strong Relationship):** Implementation of `Order` and `OrderItem`. If an Order is deleted, its Items cease to exist conceptually.
-* **Aggregation (Weak Relationship):** Implementation of `Order` and `Customer`. A Customer persists independently of their Orders.
-* **Polymorphism:** Unified interface for `PhysicalProduct` (shipping logic) and `DigitalProduct` (download logic).
-* **Encapsulation:** Strict control over `_stock` and `_price` attributes to prevent invalid business states.
+- 🧾 **Order Lifecycle**
+  - OPEN → PAID → CANCELED states
+  - Immutable price after item is added
+  - Stock restoration on cancellation
 
-## 🛠️ Stack & Standards
+- 💾 **Persistent Storage (JSON)**
+  - `inventory.json` for products
+  - `orders.json` for order history
+  - Robust loading with validation
 
-* **Language:** Python 3.10+
-* **Typing:** PEP 484 Type Hints (`List`, `Optional`, custom types).
-* **Documentation:** PEP 257 Docstrings for all classes and business methods.
-* **Style:** Adherence to PEP 8 coding conventions.
+- 🧠 **Clean Architecture**
+  - Separation of concerns
+  - Domain-driven models
+  - Repository-style catalog
+  - CLI as interface layer only
 
-## 📂 Architecture Overview
+---
 
-The system is designed with a clear separation of responsibilities. Below is the class relationship diagram:
+## 🧱 Project Structure
 
-```mermaid
-classDiagram
-    class Product {
-        +update_price()
-        +reduce_stock()
-    }
-    class Order {
-        +add_item()
-        +finish_order()
-    }
-    class OrderItem {
-        -quantity
-        -unit_price
-        +calculate_subtotal()
-    }
-    class Customer {
-        +name
-        +email
-    }
-    
-    Order *-- OrderItem : Composition (Has-a)
-    Order o-- Customer : Aggregation (Has-a)
-    Product <|-- PhysicalProduct : Inheritance
-    Product <|-- DigitalProduct : Inheritance
+```
+PyStore/
+│
+├── main.py                 # CLI entry point
+├── inventory.json          # Product catalog (persistent)
+├── orders.json             # Order history (auto-generated)
+│
+└── models/
+    ├── product.py          # Product domain models
+    ├── order.py            # Order and cart logic
+    ├── catalog.py          # Catalog repository
+    └── database.py         # JSON persistence layer
+```
+
+---
+
+## 🧩 Core Concepts Demonstrated
+
+### Object-Oriented Programming (OOP)
+- Encapsulation with properties
+- Inheritance for product specialization
+- Composition (Order → OrderItem)
+- Operator overloading (`+=`, `-=`)
+- Object state management
+
+### Software Design
+- Single Responsibility Principle (SRP)
+- Separation of Interface / Domain / Persistence
+- Factory-like object reconstruction from JSON
+- Defensive programming and validation
+
+### Persistence
+- Manual serialization/deserialization
+- JSON as lightweight database
+- Fault-tolerant loading
+
+---
+
+## ▶️ How to Run
+
+### Requirements
+- Python **3.10+**
+- Linux / macOS / WSL (recommended)
+
+### Run the application
+
+```bash
+python3 main.py
+```
+
+---
+
+## 📋 CLI Menu
+
+```
+1. View Catalog
+2. New Order
+3. Add Item
+4. View Cart
+5. Remove Item
+6. Cancel Order
+7. Finish Order (Checkout)
+8. View Order History
+0. Exit
+```
+
+---
+
+## 🛠 Example Use Case
+
+1. Start the application
+2. Load product catalog from `inventory.json`
+3. Create an order for a customer
+4. Add/remove items from the cart
+5. Finalize the order
+6. Persist order to `orders.json`
+
+---
+
+## 🧪 Testing
+
+Basic unit tests validate:
+- Order creation
+- Item quantity aggregation
+- Stock reduction
+- Order completion
+
+Tests are written using Python’s built-in `unittest` framework.
+
+---
+
+## 📈 Possible Improvements
+
+- Save and restore open carts
+- Apply discounts and coupons
+- Support multiple concurrent carts
+- Replace JSON with SQLite or PostgreSQL
+- Expose REST API with FastAPI
+- Add authentication and user roles
+- Create a web frontend
+
+---
+
+## 👨‍💻 Author
+
+**Danilo Côrtes Gonçalves**  
+Python Backend Developer | Software Engineering Student  
+📍 Porto, Portugal  
+
+- LinkedIn: https://www.linkedin.com/in/daniloctech
+- GitHub: (add your repository link here)
+
+---
+
+## ⭐ Why This Project Matters
+
+This project shows **how to think like a software engineer**, not just how to write Python code.
+
+It demonstrates:
+- Real-world business rules
+- Clean and scalable architecture
+- Professional coding practices
+- Readability and maintainability
+
+Perfect as a **portfolio project**, technical interview discussion, or base for real applications.
+
+---
+
+Feel free to fork, improve, and adapt PyStore to your own needs.

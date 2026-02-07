@@ -1,0 +1,23 @@
+[
+    {
+        "customer_name": "Danilo",
+        "status": "PAID",
+        "created_at_utc": "2026-02-07T22:28:01.701027",
+        "finished_at_utc": "2026-02-07T22:28:35.538004",
+        "items": [
+            {
+                "name": "Banana",
+                "quantity": 2,
+                "unit_price": 10.5,
+                "subtotal": 21.0
+            },
+            {
+                "name": "Laptop",
+                "quantity": 1,
+                "unit_price": 1200.0,
+                "subtotal": 1200.0
+            }
+        ],
+        "total": 1221.0
+    }
+]
