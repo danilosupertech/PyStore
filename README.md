@@ -150,7 +150,7 @@ Python Backend Developer | Software Engineering Student
 📍 Porto, Portugal  
 
 - LinkedIn: https://www.linkedin.com/in/daniloctech
-- GitHub: (add your repository link here)
+- GitHub: https://github.com/danilosupertech
 
 ---
 
