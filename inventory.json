@@ -3,7 +3,7 @@
         "type": "generic",
         "name": "Banana",
         "price": 10.5,
-        "stock": 37
+        "stock": 35
     },
     {
         "type": "physical",
@@ -30,7 +30,7 @@
         "type": "digital",
         "name": "Online Course",
         "price": 99.0,
-        "stock": 1000,
+        "stock": 998,
         "size_mb": 5000.0
     },
     {
@@ -133,7 +133,7 @@
         "type": "digital",
         "name": "UI Icons Bundle",
         "price": 9.99,
-        "stock": 9999,
+        "stock": 9998,
         "size_mb": 180.0
     }
 ]

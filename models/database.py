@@ -3,18 +3,26 @@ database.py
 
 Database module for saving/loading the product catalog (inventory.json)
 and storing finished orders (orders.json).
-"""
 
+NOTE:
+This module handles only JSON I/O.
+Object reconstruction is delegated to Product.from_dict() (domain).
+"""
 import json
 import os
 from typing import List, Dict, Any
 
-from models.product import Product, PhysicalProduct, DigitalProduct
+from models.product import Product
 
 # Always store JSON files at the project root (one folder above /models)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INVENTORY_FILE = os.path.join(BASE_DIR, "inventory.json")
 ORDERS_FILE = os.path.join(BASE_DIR, "orders.json")
+
+
+def inventory_exists() -> bool:
+    """True if inventory.json exists on disk."""
+    return os.path.exists(INVENTORY_FILE)
 
 
 def save_catalog(products: List[Product]) -> None:
@@ -31,7 +39,7 @@ def save_catalog(products: List[Product]) -> None:
 
 def load_catalog() -> List[Product]:
     """
-    Reads the JSON and recreates the objects (PhysicalProduct or DigitalProduct).
+    Reads the JSON and recreates product objects using Product.from_dict().
     Returns an empty list if the file does not exist or cannot be read.
     """
     if not os.path.exists(INVENTORY_FILE):
@@ -41,42 +49,23 @@ def load_catalog() -> List[Product]:
         with open(INVENTORY_FILE, "r", encoding="utf-8") as file:
             data_list = json.load(file)
 
+        if not isinstance(data_list, list):
+            print("❌ inventory.json is not a list. Ignoring.")
+            return []
+
         print(f"📂 JSON records found: {len(data_list)}")
 
         products_catalog: List[Product] = []
 
         for idx, item in enumerate(data_list, start=1):
             try:
-                type_ = item.get("type", "generic")
-
-                if type_ == "physical":
-                    product = PhysicalProduct(
-                        item["name"],
-                        float(item["price"]),
-                        int(item["stock"]),
-                        float(item["weight"]),
-                    )
-                elif type_ == "digital":
-                    product = DigitalProduct(
-                        item["name"],
-                        float(item["price"]),
-                        int(item["stock"]),
-                        float(item["size_mb"]),
-                    )
-                else:
-                    product = Product(
-                        item["name"],
-                        float(item["price"]),
-                        int(item["stock"]),
-                    )
+                product = Product.from_dict(item)
                 products_catalog.append(product)
-
             except Exception as e:
                 print(f"❌ Failed to load item #{idx}: {item}")
                 print(f"   Reason: {e}")
 
-        print(
-            f"📂 {len(products_catalog)} products loaded from inventory.")
+        print(f"📂 {len(products_catalog)} products loaded from inventory.")
         return products_catalog
 
     except (OSError, json.JSONDecodeError) as e:
