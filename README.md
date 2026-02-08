@@ -1,40 +1,48 @@
 
 # 🛒 PyStore — CLI Store Management System (Python)
 
-PyStore is a **Python-based CLI (Command Line Interface) store management system** designed to demonstrate strong foundations in **Object-Oriented Programming**, **clean architecture**, and **data persistence** using JSON.
+PyStore is a **Python-based CLI (Command Line Interface) store management system** designed to demonstrate solid foundations in **Object-Oriented Programming**, **Clean Architecture**, and **separation of concerns**, with **JSON persistence** as infrastructure.
 
-This project was built with a focus on **software design principles**, making it an excellent **portfolio project for junior–mid Python developers** and a solid base for future expansion into APIs or full-stack systems.
+This project goes beyond a simple CRUD example: it was **intentionally refactored to avoid “God classes/modules”**, making responsibilities explicit and the codebase easy to evolve.
+
+It is an excellent **portfolio project for junior–mid Python developers**, and a strong base for future expansion into **APIs, payment systems, or web frontends**.
 
 ---
 
 ## 🚀 Key Features
 
-- 📦 **Product Catalog**
-  - Generic, Physical, and Digital products
-  - Real-time stock management
-  - Automatic shipping calculation for physical products
+### 📦 Product Catalog
+- Generic, Physical, and Digital products
+- Real-time stock management
+- Automatic shipping calculation for physical products
+- Factory-based reconstruction from JSON (`Product.from_dict`)
 
-- 🛒 **Shopping Cart (Order)**
-  - Add / remove items
-  - Partial or full item removal
-  - Automatic stock updates
-  - Cart summary per customer
+### 🛒 Shopping Cart
+- Dedicated `Cart` domain model
+- Add / remove items (partial or full)
+- Frozen item price at add time
+- Automatic stock reservation and restoration
 
-- 🧾 **Order Lifecycle**
-  - OPEN → PAID → CANCELED states
-  - Immutable price after item is added
-  - Stock restoration on cancellation
+### 🧾 Order Lifecycle
+- Explicit states: `OPEN → PAID → CANCELED`
+- Order owns a Cart (composition)
+- Stock restoration on cancellation
+- Immutable order history records
 
-- 💾 **Persistent Storage (JSON)**
-  - `inventory.json` for products
-  - `orders.json` for order history
-  - Robust loading with validation
+### 💾 Persistence (JSON)
+- `inventory.json` for products
+- `orders.json` for order history
+- Repositories responsible only for I/O
+- Fault-tolerant loading and validation
 
-- 🧠 **Clean Architecture**
-  - Separation of concerns
-  - Domain-driven models
-  - Repository-style catalog
-  - CLI as interface layer only
+### 🧠 Clean Architecture
+- No “God classes”
+- Clear boundaries between:
+  - Domain (models)
+  - Infrastructure (repositories)
+  - Application logic (services)
+  - Interface (CLI)
+- Ready for future integrations (payments, APIs, DBs)
 
 ---
 
@@ -43,38 +51,80 @@ This project was built with a focus on **software design principles**, making it
 ```
 PyStore/
 │
-├── main.py                 # CLI entry point
-├── inventory.json          # Product catalog (persistent)
-├── orders.json             # Order history (auto-generated)
+├── main.py                     # CLI entry point (UI only)
+├── inventory.json              # Product catalog (persistent)
+├── orders.json                 # Order history
 │
-└── models/
-    ├── product.py          # Product domain models
-    ├── order.py            # Order and cart logic
-    ├── catalog.py          # Catalog repository
-    └── database.py         # JSON persistence layer
+├── models/                     # Domain layer (business rules)
+│   ├── product.py              # Product hierarchy + factory
+│   ├── cart.py                 # Shopping cart logic
+│   ├── order.py                # Order lifecycle
+│   └── catalog.py              # In-memory catalog
+│
+├── repositories/               # Infrastructure (persistence)
+│   ├── inventory_repo.py       # inventory.json I/O
+│   └── orders_repo.py          # orders.json I/O
+│
+└── services/                   # Application services
+    └── store_service.py        # Use-case orchestration
 ```
 
 ---
 
-## 🧩 Core Concepts Demonstrated
+## 🧩 Architectural Decisions (What & Why)
 
-### Object-Oriented Programming (OOP)
-- Encapsulation with properties
-- Inheritance for product specialization
-- Composition (Order → OrderItem)
-- Operator overloading (`+=`, `-=`)
-- Object state management
+### 1️⃣ Cart separated from Order
+**What:**  
+- Introduced a `Cart` model independent from `Order`.
 
-### Software Design
-- Single Responsibility Principle (SRP)
-- Separation of Interface / Domain / Persistence
-- Factory-like object reconstruction from JSON
-- Defensive programming and validation
+**Why:**  
+- Avoided a “God Order” class.
+- Isolated cart logic (add/remove/total).
+- Makes pricing, discounts, and persistence easier to evolve.
 
-### Persistence
-- Manual serialization/deserialization
-- JSON as lightweight database
-- Fault-tolerant loading
+---
+
+### 2️⃣ Services Layer (`StoreService`)
+**What:**  
+- Centralized application flow in a service.
+
+**Why:**  
+- Keeps `main.py` thin (UI only).
+- Prevents business logic leakage into CLI.
+- Simplifies testing and future API reuse.
+
+---
+
+### 3️⃣ Repository Pattern
+**What:**  
+- `InventoryRepository` and `OrdersRepository` handle JSON only.
+
+**Why:**  
+- Persistence is infrastructure, not business logic.
+- Enables easy migration to SQLite/PostgreSQL later.
+- Keeps domain models pure and reusable.
+
+---
+
+### 4️⃣ Factory Method in Domain (`Product.from_dict`)
+**What:**  
+- Object reconstruction moved into the Product model.
+
+**Why:**  
+- Prevents `if/else` explosion in repositories.
+- Keeps knowledge of product types inside the domain.
+- Aligns with Domain-Driven Design principles.
+
+---
+
+### 5️⃣ Explicit Order Lifecycle
+**What:**  
+- Orders move through well-defined states.
+
+**Why:**  
+- Prevents invalid operations.
+- Makes payment integration straightforward.
+- Improves correctness and readability.
 
 ---
 
@@ -82,7 +132,7 @@ PyStore/
 
 ### Requirements
 - Python **3.10+**
-- Linux / macOS / WSL (recommended)
+- Linux / macOS / WSL recommended
 
 ### Run the application
 
@@ -111,35 +161,32 @@ python3 main.py
 ## 🛠 Example Use Case
 
 1. Start the application
-2. Load product catalog from `inventory.json`
-3. Create an order for a customer
-4. Add/remove items from the cart
-5. Finalize the order
-6. Persist order to `orders.json`
+2. Catalog is loaded or seeded automatically
+3. Create a new order
+4. Add or remove items from the cart
+5. Checkout (order becomes PAID)
+6. Order is persisted to `orders.json`
 
 ---
 
-## 🧪 Testing
+## 🧪 Testing Readiness
 
-Basic unit tests validate:
-- Order creation
-- Item quantity aggregation
-- Stock reduction
-- Order completion
-
-Tests are written using Python’s built-in `unittest` framework.
+The architecture supports:
+- Unit testing of domain models (Cart, Order, Product)
+- Mocking repositories for service tests
+- Future test automation with `pytest` or `unittest`
 
 ---
 
 ## 📈 Possible Improvements
 
-- Save and restore open carts
-- Apply discounts and coupons
-- Support multiple concurrent carts
-- Replace JSON with SQLite or PostgreSQL
-- Expose REST API with FastAPI
-- Add authentication and user roles
-- Create a web frontend
+- Persist open carts
+- Add discounts, coupons, and taxes
+- Integrate payment gateways
+- Replace JSON with a relational database
+- Expose REST API (FastAPI)
+- Authentication and roles
+- Web or mobile frontend
 
 ---
 
@@ -150,22 +197,18 @@ Python Backend Developer | Software Engineering Student
 📍 Porto, Portugal  
 
 - LinkedIn: https://www.linkedin.com/in/daniloctech
-- GitHub: https://github.com/danilosupertech
+- GitHub: (add repository link)
 
 ---
 
 ## ⭐ Why This Project Matters
 
-This project shows **how to think like a software engineer**, not just how to write Python code.
+PyStore demonstrates **engineering thinking**, not just Python syntax.
 
-It demonstrates:
+It shows:
+- Clean separation of responsibilities
+- Scalable design decisions
 - Real-world business rules
-- Clean and scalable architecture
-- Professional coding practices
-- Readability and maintainability
+- Professional-level refactoring discipline
 
-Perfect as a **portfolio project**, technical interview discussion, or base for real applications.
-
----
-
-Feel free to fork, improve, and adapt PyStore to your own needs.
+Ideal as a **portfolio project**, interview discussion topic, or foundation for production systems.
